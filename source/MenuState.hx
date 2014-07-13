@@ -1,5 +1,6 @@
 package;
 
+import flixel.FlxG;
 import flixel.FlxState;
 
 /**
@@ -31,5 +32,9 @@ class MenuState extends FlxState {
 	 */
     override public function update():Void {
         super.update();
+
+        if(FlxG.mouse.justPressed) {
+            _spr.play(1);
+        }
     }
 }

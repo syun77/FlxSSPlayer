@@ -134,11 +134,12 @@ class FlxSSPlayer extends FlxSprite {
     private var _frame:Int = 0;
     private var _frameMax:Int = 0;
 
+    private var _bPlaying:Bool = false;
+    private var _nPlay:Int = 0;
+    private var _nPlayMax:Int = 0;
+
     public function new(X:Float, Y:Float, Description:String, AssetName:String, FrameName:String) {
         super();
-
-        // 描画オフセット設定
-        setDrawOffset(X, Y);
 
         // アトラステクスチャ読み込み
         _tex = new SSTexturePackerData(Description, AssetName);
@@ -149,11 +150,17 @@ class FlxSSPlayer extends FlxSprite {
         // アニメーション読み込み
         loadAnimation(Description, FrameName);
 
+        // 描画オフセット設定
+        setDrawOffset(X, Y);
     }
 
     public function setDrawOffset(X:Float, Y:Float):Void {
         _ofsX = X;
         _ofsY = Y;
+
+        // 座標更新
+        x = _ofsX + _animation.x;
+        y = _ofsY + _animation.y;
     }
 
     public function loadAnimation(Animation:String, Framename:String):Void {
@@ -163,7 +170,7 @@ class FlxSSPlayer extends FlxSprite {
         var parts = anim.parts;
         var ssa = anim.ssa;
 
-        // アニメーション配列を格納
+        // アニメーション番号を格納
         _animation = new SSAnimation(ssa);
         var i = -1; // root を無視するため-1から開始
         for(name in Lambda.array(parts)) {
@@ -178,7 +185,19 @@ class FlxSSPlayer extends FlxSprite {
         _frameMax = _animation.frameMax();
     }
 
+    public function play(cnt:Int=-1) {
+        _bPlaying = true;
+        _nPlay = 0;
+        _nPlayMax = cnt;
+    }
+
     override public function update():Void {
+
+        if(_bPlaying == false) {
+            // 停止中
+            return;
+        }
+
         _animation.setNow(_frame);
 
         // アニメーションパラメータ反映
@@ -193,6 +212,11 @@ class FlxSSPlayer extends FlxSprite {
         _frame++;
         if(_frame >= _frameMax) {
             _frame = 0;
+            _nPlay++;
+            if(_nPlay >= _nPlayMax) {
+                // 再生終了
+                _bPlaying = false;
+            }
         }
 
         super.update();
