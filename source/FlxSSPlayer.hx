@@ -1,5 +1,6 @@
 package ;
 
+import flixel.util.FlxTimer;
 import Lambda;
 import flixel.util.FlxAngle;
 import haxe.Json;
@@ -138,6 +139,9 @@ class FlxSSPlayer extends FlxSprite {
     private var _nPlay:Int = 0;
     private var _nPlayMax:Int = 0;
 
+    private var _fps:Float = 0;
+    private var _timer:FlxTimer = null;
+
     public function new(X:Float, Y:Float, Description:String, AssetName:String, FrameName:String) {
         super();
 
@@ -152,6 +156,44 @@ class FlxSSPlayer extends FlxSprite {
 
         // 描画オフセット設定
         setDrawOffset(X, Y);
+
+        _timer = new FlxTimer(1/_fps, _updateAnimation, 0);
+    }
+
+    override public function destroy():Void {
+        super.destroy();
+        _timer.destroy();
+        _timer = null;
+        _tex.destroy();
+        _tex = null;
+    }
+
+    private function _updateAnimation(timer:FlxTimer):Void {
+        if(_bPlaying == false) {
+            // 停止中
+            return;
+        }
+
+        _animation.setNow(_frame);
+
+        // アニメーションパラメータ反映
+        x = _ofsX + _animation.x;
+        y = _ofsY + _animation.y;
+        angle = -_animation.angle * FlxAngle.TO_DEG;
+        scale.set(_animation.scaleX, _animation.scaleY);
+        flipX = _animation.flipH;
+        flipY = _animation.flipV;
+        alpha = _animation.alpha;
+
+        _frame++;
+        if(_frame >= _frameMax) {
+            _frame = 0;
+            _nPlay++;
+            if(_nPlay >= _nPlayMax) {
+                // 再生終了
+                _bPlaying = false;
+            }
+        }
     }
 
     public function setDrawOffset(X:Float, Y:Float):Void {
@@ -169,6 +211,9 @@ class FlxSSPlayer extends FlxSprite {
         var anim = data[0].animation;
         var parts = anim.parts;
         var ssa = anim.ssa;
+
+        // フレームレート
+        _fps = anim.fps;
 
         // アニメーション番号を格納
         _animation = new SSAnimation(ssa);
@@ -226,31 +271,6 @@ class FlxSSPlayer extends FlxSprite {
 
     override public function update():Void {
 
-        if(_bPlaying == false) {
-            // 停止中
-            return;
-        }
-
-        _animation.setNow(_frame);
-
-        // アニメーションパラメータ反映
-        x = _ofsX + _animation.x;
-        y = _ofsY + _animation.y;
-        angle = _animation.angle * FlxAngle.TO_DEG;
-        scale.set(_animation.scaleX, _animation.scaleY);
-        flipX = _animation.flipH;
-        flipY = _animation.flipV;
-        alpha = _animation.alpha;
-
-        _frame++;
-        if(_frame >= _frameMax) {
-            _frame = 0;
-            _nPlay++;
-            if(_nPlay >= _nPlayMax) {
-                // 再生終了
-                _bPlaying = false;
-            }
-        }
 
         super.update();
     }

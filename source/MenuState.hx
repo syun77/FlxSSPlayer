@@ -41,7 +41,7 @@ class MenuState extends FlxState {
             _spr.toggle();
         }
         if(FlxG.keys.justPressed.R) {
-            _spr.init();
+            FlxG.resetState();
         }
     }
 }
