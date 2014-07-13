@@ -259,20 +259,19 @@ class FlxSSPlayer extends FlxSprite {
         }
     }
 
-    public function init():Void {
+    /**
+     * 初期位置に戻す
+     **/
+    public function resetAnimation():Void {
         _frame = 0;
+        _nPlay = 0;
+        _nPlayMax = 0;
 
         // カラ回しする
         _bPlaying = true;
         update();
         _bPlaying = false;
         _frame = 0;
-    }
-
-    override public function update():Void {
-
-
-        super.update();
     }
 }
 
