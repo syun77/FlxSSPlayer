@@ -1,5 +1,6 @@
 package ;
 
+import Lambda;
 import flixel.util.FlxAngle;
 import haxe.Json;
 import flixel.FlxSprite;
@@ -135,12 +136,18 @@ class FlxSSPlayer extends FlxSprite {
 
     public function new(X:Float, Y:Float, Description:String, AssetName:String, FrameName:String) {
         super();
+
+        // 描画オフセット設定
         setDrawOffset(X, Y);
+
+        // アトラステクスチャ読み込み
         _tex = new SSTexturePackerData(Description, AssetName);
 
+        // テクスチャを適用
         loadGraphicFromTexture(_tex, false, FrameName);
 
-        loadAnimation(Description);
+        // アニメーション読み込み
+        loadAnimation(Description, FrameName);
 
     }
 
@@ -149,15 +156,23 @@ class FlxSSPlayer extends FlxSprite {
         _ofsY = Y;
     }
 
-    public function loadAnimation(Animation:String):Void {
+    public function loadAnimation(Animation:String, Framename:String):Void {
         var data = Json.parse(openfl.Assets.getText(Animation));
 
         var anim = data[0].animation;
+        var parts = anim.parts;
         var ssa = anim.ssa;
 
         // アニメーション配列を格納
         _animation = new SSAnimation(ssa);
-        _animation.setNo(0);
+        var i = -1; // root を無視するため-1から開始
+        for(name in Lambda.array(parts)) {
+            if(name == Framename) {
+                _animation.setNo(i);
+                break;
+            }
+            i++;
+        }
 
         _frame = 0;
         _frameMax = _animation.frameMax();
