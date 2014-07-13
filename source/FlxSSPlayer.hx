@@ -185,10 +185,43 @@ class FlxSSPlayer extends FlxSprite {
         _frameMax = _animation.frameMax();
     }
 
-    public function play(cnt:Int=-1) {
+    public function play(cnt:Int=-1):Void {
         _bPlaying = true;
         _nPlay = 0;
         _nPlayMax = cnt;
+    }
+
+    public function pause():Void {
+        _bPlaying = false;
+    }
+
+    public function resume():Void {
+        if(_nPlay < _nPlayMax) {
+            _bPlaying = true;
+        }
+    }
+
+    public function isPause():Bool {
+        return _bPlaying;
+    }
+
+    public function toggle():Void {
+        if(isPause()) {
+            pause();
+        }
+        else {
+            resume();
+        }
+    }
+
+    public function init():Void {
+        _frame = 0;
+
+        // カラ回しする
+        _bPlaying = true;
+        update();
+        _bPlaying = false;
+        _frame = 0;
     }
 
     override public function update():Void {

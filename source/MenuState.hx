@@ -36,5 +36,12 @@ class MenuState extends FlxState {
         if(FlxG.mouse.justPressed) {
             _spr.play(1);
         }
+
+        if(FlxG.keys.justPressed.D) {
+            _spr.toggle();
+        }
+        if(FlxG.keys.justPressed.R) {
+            _spr.init();
+        }
     }
 }
