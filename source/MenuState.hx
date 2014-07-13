@@ -12,11 +12,36 @@ class MenuState extends FlxState {
 	 */
 
     private var _spr:FlxSSPlayer;
+    private var _spr2:FlxSSPlayer;
+    private var _spr3:FlxSSPlayer;
+    private var _spr4:FlxSSPlayer;
+    private var _tex:SSTexturePackerData;
 
     override public function create():Void {
         super.create();
-        _spr = new FlxSSPlayer(20, 20, "assets/images/NewAnimation_anime_1.json", "assets/images/20110821_tile_char.png", "Player");
+//        var anim = "assets/images/NewAnimation_anime_1.json";
+//        var png = "assets/images/20110821_tile_char.png";
+//        var anim = "Player";
+        var ss = "assets/images/antarctic3_anime_1.json";
+        var png = "assets/images/antarctic.png";
+        var anim = 0;
+        _tex = new SSTexturePackerData(ss, png);
+        _tex.dump();
+        _spr = new FlxSSPlayer(20, 20, ss, _tex, anim);
         this.add(_spr);
+        _spr.play();
+
+        _spr2 = new FlxSSPlayer(20, 20, ss, _tex, 1);
+        this.add(_spr2);
+        _spr2.play();
+        _spr3 = new FlxSSPlayer(20, 20, ss, _tex, 2);
+        this.add(_spr3);
+        _spr3.play();
+        _spr4 = new FlxSSPlayer(20, 20, ss, _tex, 3);
+        this.add(_spr4);
+        _spr4.play();
+
+        FlxG.debugger.toggleKeys = ["ALT"];
     }
 
     /**
@@ -41,7 +66,8 @@ class MenuState extends FlxState {
             _spr.toggle();
         }
         if(FlxG.keys.justPressed.R) {
-            _spr.resetAnimation();
+//            _spr.resetAnimation();
+            FlxG.resetState();
         }
     }
 }

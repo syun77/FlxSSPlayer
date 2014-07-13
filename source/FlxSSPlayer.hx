@@ -1,7 +1,7 @@
 package ;
 
+import flixel.FlxG;
 import flixel.util.FlxTimer;
-import Lambda;
 import flixel.util.FlxAngle;
 import haxe.Json;
 import flixel.FlxSprite;
@@ -27,6 +27,10 @@ class SSAnimation {
     private static inline var IDX_V0_X = 16;
     private static inline var IDX_V0_Y = 17;
 
+    public var sourceX(get, null):Int;
+    public var sourceY(get, null):Int;
+    public var sourceW(get, null):Int;
+    public var sourceH(get, null):Int;
     public var x(get, null):Float;
     public var y(get, null):Float;
     public var angle(get, null):Float;
@@ -62,7 +66,7 @@ class SSAnimation {
     public function getDataValue(frame:Int=-1, idx:Int) {
         var data = getData(frame);
 
-        if(idx >= cast(data).length) {
+        if(data == null || idx >= cast(data).length) {
             // データが存在しない
             return 0;
         }
@@ -71,7 +75,7 @@ class SSAnimation {
     public function hasDataValue(frame:Int=-1, idx:Int):Bool {
         var data = getData(frame);
 
-        if(idx >= cast(data).length) {
+        if(data == null || idx >= cast(data).length) {
             // データが存在しない
             return false;
         }
@@ -79,6 +83,18 @@ class SSAnimation {
         return true;
     }
 
+    private function get_sourceX():Int {
+        return cast getDataValue(-1, IDX_SOURCE_X);
+    }
+    private function get_sourceY():Int {
+        return cast getDataValue(-1, IDX_SOURCE_Y);
+    }
+    private function get_sourceW():Int {
+        return cast getDataValue(-1, IDX_SOURCE_W);
+    }
+    private function get_sourceH():Int {
+        return cast getDataValue(-1, IDX_SOURCE_H);
+    }
     private function get_x():Float {
         return cast getDataValue(-1, IDX_DST_X);
     }
@@ -127,8 +143,10 @@ class SSAnimation {
 
 class FlxSSPlayer extends FlxSprite {
 
+    // オフセット用パラメータ
     private var _ofsX:Float;
     private var _ofsY:Float;
+    private var _ofsAlpha:Float = 1;
 
     private var _tex:SSTexturePackerData;
     private var _animation:SSAnimation = null;
@@ -141,23 +159,46 @@ class FlxSSPlayer extends FlxSprite {
 
     private var _fps:Float = 0;
     private var _timer:FlxTimer = null;
+    private var _prevAnimationTexName = "";
 
-    public function new(X:Float, Y:Float, Description:String, AssetName:String, FrameName:String) {
+    public function new(X:Float, Y:Float, Description:String, Texture:Dynamic, FrameNo:Int) {
         super();
 
-        // アトラステクスチャ読み込み
-        _tex = new SSTexturePackerData(Description, AssetName);
-
-        // テクスチャを適用
-        loadGraphicFromTexture(_tex, false, FrameName);
+        if (Std.is(Texture, SSTexturePackerData)) {
+            // テクスチャなのでそのまま設定
+            _tex = Texture;
+        }
+        else {
+            // アトラステクスチャ読み込み
+            _tex = new SSTexturePackerData(Description, cast Texture);
+        }
 
         // アニメーション読み込み
-        loadAnimation(Description, FrameName);
+        loadAnimation(Description, FrameNo);
+
+        var name = _getAnimationTexName();
+        // テクスチャを適用
+        loadGraphicFromTexture(_tex, false, name);
+        if(name == "0,0,0,0") {
+            visible = false;
+        }
+        _prevAnimationTexName = name;
 
         // 描画オフセット設定
         setDrawOffset(X, Y);
 
         _timer = new FlxTimer(1/_fps, _updateAnimation, 0);
+
+        FlxG.watch.add(this, "_prevAnimationTexName");
+        FlxG.watch.add(_animation, "originX");
+        FlxG.watch.add(_animation, "originY");
+    }
+
+    private function _getAnimationTexName():String {
+        return "" + _animation.sourceX
+            + "," + _animation.sourceY
+            + "," + _animation.sourceW
+            + "," + _animation.sourceH;
     }
 
     override public function destroy():Void {
@@ -168,13 +209,23 @@ class FlxSSPlayer extends FlxSprite {
         _tex = null;
     }
 
-    private function _updateAnimation(timer:FlxTimer):Void {
+    private function _updateAnimation(?timer:FlxTimer):Void {
         if(_bPlaying == false) {
             // 停止中
             return;
         }
 
         _animation.setNow(_frame);
+
+        var name = _getAnimationTexName();
+        if(name == "0,0,0,0") {
+            visible = false;
+        }
+        if(name != _prevAnimationTexName) {
+            loadGraphicFromTexture(_tex, false, name);
+            _prevAnimationTexName = name;
+            visible = true;
+        }
 
         // アニメーションパラメータ反映
         x = _ofsX + _animation.x;
@@ -183,13 +234,18 @@ class FlxSSPlayer extends FlxSprite {
         scale.set(_animation.scaleX, _animation.scaleY);
         flipX = _animation.flipH;
         flipY = _animation.flipV;
-        alpha = _animation.alpha;
+        alpha = _animation.alpha * _ofsAlpha;
+//        origin.set(_animation.originX, _animation.originY);
+        offset.set(_animation.originX, _animation.originY);
 
         _frame++;
         if(_frame >= _frameMax) {
             _frame = 0;
             _nPlay++;
-            if(_nPlay >= _nPlayMax) {
+            if(_nPlayMax <= 0) {
+                // 無限ループ
+            }
+            else if(_nPlay >= _nPlayMax) {
                 // 再生終了
                 _bPlaying = false;
             }
@@ -205,11 +261,14 @@ class FlxSSPlayer extends FlxSprite {
         y = _ofsY + _animation.y;
     }
 
-    public function loadAnimation(Animation:String, Framename:String):Void {
+    public function setOffsetAlpha(Alpha:Float) {
+        _ofsAlpha = Alpha;
+    }
+
+    public function loadAnimation(Animation:String, FrameNo:Int):Void {
         var data = Json.parse(openfl.Assets.getText(Animation));
 
         var anim = data[0].animation;
-        var parts = anim.parts;
         var ssa = anim.ssa;
 
         // フレームレート
@@ -217,20 +276,13 @@ class FlxSSPlayer extends FlxSprite {
 
         // アニメーション番号を格納
         _animation = new SSAnimation(ssa);
-        var i = -1; // root を無視するため-1から開始
-        for(name in Lambda.array(parts)) {
-            if(name == Framename) {
-                _animation.setNo(i);
-                break;
-            }
-            i++;
-        }
+        _animation.setNo(FrameNo);
 
         _frame = 0;
         _frameMax = _animation.frameMax();
     }
 
-    public function play(cnt:Int=-1):Void {
+    public function play(cnt:Int=0):Void {
         _bPlaying = true;
         _nPlay = 0;
         _nPlayMax = cnt;
@@ -248,6 +300,14 @@ class FlxSSPlayer extends FlxSprite {
 
     public function isPause():Bool {
         return _bPlaying;
+    }
+
+    public function isStop():Bool {
+        if(isPause() && _nPlay >= _nPlayMax) {
+            return true;
+        }
+
+        return false;
     }
 
     public function toggle():Void {
@@ -272,6 +332,11 @@ class FlxSSPlayer extends FlxSprite {
         update();
         _bPlaying = false;
         _frame = 0;
+    }
+
+    override public function update():Void {
+        super.update();
+//        _updateAnimation();
     }
 }
 
