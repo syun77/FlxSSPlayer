@@ -57,7 +57,7 @@ class SSTexturePackerData extends TexturePackerData
                 }
 
                 var texFrame:TextureAtlasFrame = new TextureAtlasFrame();
-                texFrame.trimmed = true;
+                texFrame.trimmed = false;
                 texFrame.rotated = false;
                 texFrame.name = name;
 

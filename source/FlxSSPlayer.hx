@@ -68,7 +68,7 @@ class SSAnimation {
 
         if(data == null || idx >= cast(data).length) {
             // データが存在しない
-            return 0;
+            return 0.0;
         }
         return data[idx];
     }
@@ -137,7 +137,7 @@ class SSAnimation {
             // データなし
             return 1;
         }
-        return cast getDataValue(-1, IDX_ALPHA);
+        return getDataValue(-1, IDX_ALPHA);
     }
 }
 
@@ -220,6 +220,7 @@ class FlxSSPlayer extends FlxSprite {
         var name = _getAnimationTexName();
         if(name == "0,0,0,0") {
             visible = false;
+            _prevAnimationTexName = name;
         }
         if(name != _prevAnimationTexName) {
             loadGraphicFromTexture(_tex, false, name);
@@ -235,7 +236,6 @@ class FlxSSPlayer extends FlxSprite {
         flipX = _animation.flipH;
         flipY = _animation.flipV;
         alpha = _animation.alpha * _ofsAlpha;
-//        origin.set(_animation.originX, _animation.originY);
         offset.set(_animation.originX, _animation.originY);
 
         _frame++;

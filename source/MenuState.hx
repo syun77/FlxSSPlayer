@@ -1,5 +1,6 @@
 package;
 
+import flixel.FlxSprite;
 import flixel.FlxG;
 import flixel.FlxState;
 
@@ -26,32 +27,32 @@ class MenuState extends FlxState {
 //        this.add(_spr);
 //        _spr.play();
 
-        var ss = "assets/images/antarctic3_anime_1.json";
-        var png = "assets/images/antarctic.png";
-        var anim = 0;
-        _tex = new SSTexturePackerData(ss, png);
-
-        _spr = new FlxSSPlayer(20, 20, ss, _tex, 0);
-        this.add(_spr);
-        _spr.play();
-        _spr2 = new FlxSSPlayer(20, 20, ss, _tex, 1);
-        this.add(_spr2);
-        _spr2.play();
-        _spr3 = new FlxSSPlayer(20, 20, ss, _tex, 2);
-        this.add(_spr3);
-        _spr3.play();
-        _spr4 = new FlxSSPlayer(20, 20, ss, _tex, 3);
-        this.add(_spr4);
-        _spr4.play();
-
-//        var ss = "assets/images/ss_logo_anime_1_root.json";
-//        var png = "assets/images/logo.png";
+//        var ss = "assets/images/antarctic3_anime_1.json";
+//        var png = "assets/images/antarctic.png";
+//        var anim = 0;
 //        _tex = new SSTexturePackerData(ss, png);
-//        for(i in 0...11) {
-//            var spr = new FlxSSPlayer(FlxG.width/2, FlxG.height/2, ss, _tex, i);
-//            spr.play();
-//            this.add(spr);
-//        }
+//
+//        _spr = new FlxSSPlayer(20, 20, ss, _tex, 0);
+//        this.add(_spr);
+//        _spr.play();
+//        _spr2 = new FlxSSPlayer(20, 20, ss, _tex, 1);
+//        this.add(_spr2);
+//        _spr2.play();
+//        _spr3 = new FlxSSPlayer(20, 20, ss, _tex, 2);
+//        this.add(_spr3);
+//        _spr3.play();
+//        _spr4 = new FlxSSPlayer(20, 20, ss, _tex, 3);
+//        this.add(_spr4);
+//        _spr4.play();
+
+        var ss = "assets/images/ss_logo_anime_1_root.json";
+        var png = "assets/images/logo.png";
+        _tex = new SSTexturePackerData(ss, png);
+        for(i in 0...11) {
+            var spr = new FlxSSPlayer(FlxG.width/2, FlxG.height/2, ss, _tex, i);
+            spr.play();
+            this.add(spr);
+        }
 
         FlxG.debugger.toggleKeys = ["ALT"];
     }
