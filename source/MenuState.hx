@@ -1,5 +1,6 @@
 package;
 
+import flash.trace.Trace;
 import flixel.FlxSprite;
 import flixel.FlxG;
 import flixel.FlxState;
@@ -48,7 +49,7 @@ class MenuState extends FlxState {
         var ss = "assets/images/ss_logo_anime_1_root.json";
         var png = "assets/images/logo.png";
         _tex = new SSTexturePackerData(ss, png);
-        for(i in 0...11) {
+        for(i in 0..._tex.animationMax) {
             var spr = new FlxSSPlayer(FlxG.width/2, FlxG.height/2, ss, _tex, i);
             spr.play();
             this.add(spr);

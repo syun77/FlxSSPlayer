@@ -19,7 +19,14 @@ class SSTexturePackerData extends TexturePackerData
     private static inline var IDX_SRC_W = 4;
     private static inline var IDX_SRC_H = 5;
 
+    // 登録したUV情報のテーブル
     private var _texTbl:Map<String,Int>;
+
+    // アニメーションの最大数
+    private var _animationMax:Int = 0;
+
+    public var animationMax(get, null):Int;
+
     /**
 	 * Data parsing method.
 	 * Override it in subclasses if you want to implement support for new atlas formats
@@ -44,7 +51,12 @@ class SSTexturePackerData extends TexturePackerData
         // UVを切り出す
         for (allframe in Lambda.array(ssa)) {
 
+            // 1フレーム内のアニメ数
+            var cntAnim:Int = 0;
+
             for (frame in Lambda.array(allframe)) {
+
+                cntAnim++;
 
                 var ox:Int = frame[IDX_SRC_X];
                 var oy:Int = frame[IDX_SRC_Y];
@@ -85,7 +97,16 @@ class SSTexturePackerData extends TexturePackerData
 
                 i++;
             }
+
+            if(cntAnim >_animationMax) {
+                // アニメーション最大数更新
+                _animationMax = cntAnim;
+            }
         }
+    }
+
+    public function get_animationMax():Int {
+        return _animationMax;
     }
 
     public function dump():Void {
