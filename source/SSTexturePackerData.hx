@@ -21,22 +21,17 @@ class SSTexturePackerData extends TexturePackerData
     private static inline var IDX_SRC_H = 5;
 
     // 登録したUV情報のテーブル
-    private var _uvTbl:Map<String,Int>;
-
-    // 登録したテクスチャ名のテーブル
-    private var _texTbl:Array<String>;
-
-//    public var assets:BitmapData;
-//    public var assetNames:String;
+    private var _uvTbl:Map<String,Int> = null;
 
     // アニメーションの最大数
     private var _animationMax:Int = 0;
 
     public var animationMax(get, null):Int;
 
-    public function getAssetName(Index:Int):String {
-        return _texTbl[Index];
-    }
+    public var imageNo:Int = 0;
+
+    // 破棄しても良いかどうか
+    private var _bDestroy:Bool = false;
 
     /**
 	 * Data parsing method.
@@ -46,26 +41,15 @@ class SSTexturePackerData extends TexturePackerData
     {
         // No need to parse data again
         if (frames.length != 0)	return;
+        if (_uvTbl != null) return;
 
         if ((assetName == null) || (description == null)) return;
 
         // UVテーブル生成
         _uvTbl = new Map<String,Int>();
 
-        // テクスチャ名テーブル
-        _texTbl = new Array<String>();
-
-//        asset = FlxG.bitmap.add(assetName).bitmap;
-//        assets = FlxG.bitmap.add(assetName).bitmap;
-//        assetNames = assetName;
-
+        asset = FlxG.bitmap.add(assetName).bitmap;
         var data:Dynamic = Json.parse(Assets.getText(description));
-
-        var images = data[0].images;
-        for(image in Lambda.array(images)) {
-            // 画像ファイル名を格納
-            _texTbl.push(assetName + "/" + image);
-        }
 
         var animation = data[0].animation;
         var ssa = animation.ssa;
@@ -82,6 +66,11 @@ class SSTexturePackerData extends TexturePackerData
                 cntAnim++;
 
                 var nImage:Int = frame[IDX_IMAGE_NO];
+                if(nImage != imageNo) {
+                    // 自分の画像のみパースする
+                    continue;
+                }
+
                 var ox:Int = frame[IDX_SRC_X];
                 var oy:Int = frame[IDX_SRC_Y];
                 var ow:Int = frame[IDX_SRC_W];
@@ -129,8 +118,36 @@ class SSTexturePackerData extends TexturePackerData
         }
     }
 
+    public static function parseTextureAll(SSJson:String, ImageDir:String):Array<SSTexturePackerData> {
+
+        var data:Dynamic = Json.parse(Assets.getText(SSJson));
+
+        var ret = new Array<SSTexturePackerData>();
+        var images = data[0].images;
+        for(image in Lambda.array(images)) {
+            // 画像ファイル名を作成
+            var assetName = ImageDir + "/" + image;
+            var tex = new SSTexturePackerData(SSJson, assetName);
+            ret.push(tex);
+        }
+
+        return ret;
+    }
+
     private function get_animationMax():Int {
         return _animationMax;
+    }
+
+    override public function destroy():Void {
+        if(_bDestroy) {
+            super.destroy();
+            _uvTbl = null;
+        }
+    }
+
+    public function destroyForce():Void {
+        _bDestroy = true;
+        destroy();
     }
 
     public function dump():Void {

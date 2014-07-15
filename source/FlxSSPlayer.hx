@@ -157,7 +157,7 @@ class FlxSSPlayer extends FlxSprite {
     private var _ofsY:Float;
     private var _ofsAlpha:Float = 1;
 
-    private var _tex:SSTexturePackerData;
+    private var _texs:Array<SSTexturePackerData>;
     private var _animation:SSAnimation = null;
     private var _frame:Int = 0;
     private var _frameMax:Int = 0;
@@ -170,17 +170,10 @@ class FlxSSPlayer extends FlxSprite {
     private var _timer:FlxTimer = null;
     private var _prevAnimationTexName = "";
 
-    public function new(X:Float, Y:Float, Description:String, Texture:Dynamic, FrameNo:Int) {
+    public function new(X:Float, Y:Float, Description:String, Textures:Array<SSTexturePackerData>, FrameNo:Int) {
         super();
 
-        if (Std.is(Texture, SSTexturePackerData)) {
-            // テクスチャなのでそのまま設定
-            _tex = Texture;
-        }
-        else {
-            // アトラステクスチャ読み込み
-            _tex = new SSTexturePackerData(Description, cast Texture);
-        }
+        _texs = Textures;
 
         // アニメーション読み込み
         loadAnimation(Description, FrameNo);
@@ -192,7 +185,7 @@ class FlxSSPlayer extends FlxSprite {
             visible = false;
         }
         else {
-            _loadTexture(_tex, imageNo, false, name);
+            _loadTexture(imageNo, false, name);
         }
         _prevAnimationTexName = name;
 
@@ -206,16 +199,39 @@ class FlxSSPlayer extends FlxSprite {
         FlxG.watch.add(_animation, "originY");
     }
 
-    private function _loadTexture(Textures:SSTexturePackerData, Index:Int = 0, Unique:Bool = false, ?FrameName:String):FlxSSPlayer {
+    private function _loadTexture(Index:Int = 0, Unique:Bool = false, ?FrameName:String):FlxSSPlayer {
 
         if(Index < 0) {
-            return this;
+            return null;
         }
 
+        var Data = _texs[Index];
+
+        if(Data.assetName == null) {
+            return null;
+        }
+        // 焼きこみ回転アニメを初期化
         bakedRotationAngle = 0;
-        var assetName = Textures.getAssetName(Index);
-        cachedGraphics = FlxG.bitmap.add(assetName, Unique);
-        cachedGraphics.data = cast Textures;
+
+        if (Std.is(Data, CachedGraphics))
+        {
+            cachedGraphics = cast Data;
+            if (cachedGraphics.data == null)
+            {
+                // テクスチャが破棄されている場合は何も表示しない
+                visible = false;
+                return null;
+            }
+        }
+        else if (Std.is(Data, SSTexturePackerData))
+        {
+            cachedGraphics = FlxG.bitmap.add(Data.assetName, Unique);
+            cachedGraphics.data = cast Data;
+        }
+        else
+        {
+            return null;
+        }
 
         region = new Region();
         region.width = cachedGraphics.bitmap.width;
@@ -252,8 +268,7 @@ class FlxSSPlayer extends FlxSprite {
         super.destroy();
         _timer.destroy();
         _timer = null;
-        _tex.destroy();
-        _tex = null;
+        _texs = null;
     }
 
     private function _updateAnimation(?timer:FlxTimer):Void {
@@ -271,7 +286,7 @@ class FlxSSPlayer extends FlxSprite {
         }
         if(name != _prevAnimationTexName) {
             var imageNo = _animation.imageNo;
-            _loadTexture(_tex, imageNo, false, name);
+            _loadTexture(imageNo, false, name);
             _prevAnimationTexName = name;
             visible = true;
         }
