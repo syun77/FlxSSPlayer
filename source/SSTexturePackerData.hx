@@ -14,18 +14,29 @@ import openfl.Assets;
  **/
 class SSTexturePackerData extends TexturePackerData
 {
+    private static inline var IDX_IMAGE_NO = 1;
     private static inline var IDX_SRC_X = 2;
     private static inline var IDX_SRC_Y = 3;
     private static inline var IDX_SRC_W = 4;
     private static inline var IDX_SRC_H = 5;
 
     // 登録したUV情報のテーブル
-    private var _texTbl:Map<String,Int>;
+    private var _uvTbl:Map<String,Int>;
+
+    // 登録したテクスチャ名のテーブル
+    private var _texTbl:Array<String>;
+
+//    public var assets:BitmapData;
+//    public var assetNames:String;
 
     // アニメーションの最大数
     private var _animationMax:Int = 0;
 
     public var animationMax(get, null):Int;
+
+    public function getAssetName(Index:Int):String {
+        return _texTbl[Index];
+    }
 
     /**
 	 * Data parsing method.
@@ -38,32 +49,45 @@ class SSTexturePackerData extends TexturePackerData
 
         if ((assetName == null) || (description == null)) return;
 
-        _texTbl = new Map<String,Int>();
+        // UVテーブル生成
+        _uvTbl = new Map<String,Int>();
 
-        asset = FlxG.bitmap.add(assetName).bitmap;
+        // テクスチャ名テーブル
+        _texTbl = new Array<String>();
+
+//        asset = FlxG.bitmap.add(assetName).bitmap;
+//        assets = FlxG.bitmap.add(assetName).bitmap;
+//        assetNames = assetName;
+
         var data:Dynamic = Json.parse(Assets.getText(description));
 
+        var images = data[0].images;
+        for(image in Lambda.array(images)) {
+            // 画像ファイル名を格納
+            _texTbl.push(assetName + "/" + image);
+        }
+
         var animation = data[0].animation;
-        var parts = animation.parts;
         var ssa = animation.ssa;
 
         var i = 0;
         // UVを切り出す
         for (allframe in Lambda.array(ssa)) {
 
-            // 1フレーム内のアニメ数
+            // 1フレーム内の最大アニメ数を数える
             var cntAnim:Int = 0;
 
             for (frame in Lambda.array(allframe)) {
 
                 cntAnim++;
 
+                var nImage:Int = frame[IDX_IMAGE_NO];
                 var ox:Int = frame[IDX_SRC_X];
                 var oy:Int = frame[IDX_SRC_Y];
                 var ow:Int = frame[IDX_SRC_W];
                 var oh:Int = frame[IDX_SRC_H];
-                var name = "" + ox + "," + oy + "," + ow + "," + oh;
-                if(_texTbl.exists(name)) {
+                var name = nImage + ":" + ox + "," + oy + "," + ow + "," + oh;
+                if(_uvTbl.exists(name)) {
                     // 既に生成済み
                     continue;
                 }
@@ -93,7 +117,7 @@ class SSTexturePackerData extends TexturePackerData
                 }
 
                 frames.push(texFrame);
-                _texTbl[name] = i;
+                _uvTbl[name] = i;
 
                 i++;
             }
@@ -105,13 +129,13 @@ class SSTexturePackerData extends TexturePackerData
         }
     }
 
-    public function get_animationMax():Int {
+    private function get_animationMax():Int {
         return _animationMax;
     }
 
     public function dump():Void {
-        for(k in _texTbl.keys()) {
-            trace(k + " = " + _texTbl[k]);
+        for(k in _uvTbl.keys()) {
+            trace(k + " = " + _uvTbl[k]);
         }
     }
 

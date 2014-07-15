@@ -1,7 +1,5 @@
 package;
 
-import flash.trace.Trace;
-import flixel.FlxSprite;
 import flixel.FlxG;
 import flixel.FlxState;
 
@@ -47,7 +45,8 @@ class MenuState extends FlxState {
 //        _spr4.play();
 
         var ss = "assets/images/ss_logo_anime_1_root.json";
-        var png = "assets/images/logo.png";
+//        var png = "assets/images/logo.png";
+        var png = "assets/images";
         _tex = new SSTexturePackerData(ss, png);
         for(i in 0..._tex.animationMax) {
             var spr = new FlxSSPlayer(FlxG.width/2, FlxG.height/2, ss, _tex, i);
@@ -82,6 +81,10 @@ class MenuState extends FlxState {
         if(FlxG.keys.justPressed.R) {
 //            _spr.resetAnimation();
             FlxG.resetState();
+        }
+
+        if(FlxG.keys.justPressed.ESCAPE) {
+            throw "Terminate.";
         }
     }
 }

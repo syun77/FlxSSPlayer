@@ -1,5 +1,7 @@
 package ;
 
+import flixel.system.layer.Region;
+import flixel.util.loaders.CachedGraphics;
 import flixel.FlxG;
 import flixel.util.FlxTimer;
 import flixel.util.FlxAngle;
@@ -27,6 +29,7 @@ class SSAnimation {
     private static inline var IDX_V0_X = 16;
     private static inline var IDX_V0_Y = 17;
 
+    public var imageNo(get, null):Int;
     public var sourceX(get, null):Int;
     public var sourceY(get, null):Int;
     public var sourceW(get, null):Int;
@@ -83,6 +86,12 @@ class SSAnimation {
         return true;
     }
 
+    private function get_imageNo():Int {
+        if(hasDataValue(-1, IDX_IMAGE_NO)) {
+            return cast getDataValue(-1, IDX_IMAGE_NO);
+        }
+        return -1;
+    }
     private function get_sourceX():Int {
         return cast getDataValue(-1, IDX_SOURCE_X);
     }
@@ -176,11 +185,14 @@ class FlxSSPlayer extends FlxSprite {
         // アニメーション読み込み
         loadAnimation(Description, FrameNo);
 
+        var imageNo = _animation.imageNo;
         var name = _getAnimationTexName();
         // テクスチャを適用
-        loadGraphicFromTexture(_tex, false, name);
-        if(name == "0,0,0,0") {
+        if(name == null) {
             visible = false;
+        }
+        else {
+            _loadTexture(_tex, imageNo, false, name);
         }
         _prevAnimationTexName = name;
 
@@ -194,8 +206,43 @@ class FlxSSPlayer extends FlxSprite {
         FlxG.watch.add(_animation, "originY");
     }
 
+    private function _loadTexture(Textures:SSTexturePackerData, Index:Int = 0, Unique:Bool = false, ?FrameName:String):FlxSSPlayer {
+
+        if(Index < 0) {
+            return this;
+        }
+
+        bakedRotationAngle = 0;
+        var assetName = Textures.getAssetName(Index);
+        cachedGraphics = FlxG.bitmap.add(assetName, Unique);
+        cachedGraphics.data = cast Textures;
+
+        region = new Region();
+        region.width = cachedGraphics.bitmap.width;
+        region.height = cachedGraphics.bitmap.height;
+
+        animation.destroyAnimations();
+        updateFrameData();
+        resetHelpers();
+
+        if (FrameName != null) {
+            animation.frameName = FrameName;
+        }
+
+        resetSizeFromFrame();
+        centerOrigin();
+        return this;
+    }
+
     private function _getAnimationTexName():String {
-        return "" + _animation.sourceX
+
+        var imageNo = _animation.imageNo;
+
+        if(imageNo < 0) {
+            return null;
+        }
+        return "" + imageNo
+            + ":" + _animation.sourceX
             + "," + _animation.sourceY
             + "," + _animation.sourceW
             + "," + _animation.sourceH;
@@ -218,12 +265,13 @@ class FlxSSPlayer extends FlxSprite {
         _animation.setNow(_frame);
 
         var name = _getAnimationTexName();
-        if(name == "0,0,0,0") {
+        if(name == null) {
             visible = false;
             _prevAnimationTexName = name;
         }
         if(name != _prevAnimationTexName) {
-            loadGraphicFromTexture(_tex, false, name);
+            var imageNo = _animation.imageNo;
+            _loadTexture(_tex, imageNo, false, name);
             _prevAnimationTexName = name;
             visible = true;
         }
