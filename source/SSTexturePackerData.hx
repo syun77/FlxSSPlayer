@@ -87,7 +87,7 @@ class SSTexturePackerData extends TexturePackerData
                 texFrame.name = name;
 
                 // サイズを設定
-                texFrame.sourceSize = FlxPoint.get(frame[IDX_SRC_W], frame[IDX_SRC_H]);
+                texFrame.sourceSize = FlxPoint.get(ow, oh);
                 texFrame.offset = FlxPoint.get(0, 0);
                 // オフセットはしない
                 texFrame.offset.set(0, 0);
@@ -95,13 +95,13 @@ class SSTexturePackerData extends TexturePackerData
                 if (texFrame.rotated)
                 {
                     // 切り取りサイズを設定
-                    texFrame.frame = new Rectangle(frame[IDX_SRC_X], frame[IDX_SRC_Y], frame[IDX_SRC_W], frame[IDX_SRC_H]);
+                    texFrame.frame = new Rectangle(ox, oy, ow, oh);
                     texFrame.additionalAngle = -90;
                 }
                 else
                 {
                     // 切り取りサイズを設定
-                    texFrame.frame = new Rectangle(frame[IDX_SRC_X], frame[IDX_SRC_Y], frame[IDX_SRC_W], frame[IDX_SRC_H]);
+                    texFrame.frame = new Rectangle(ox, oy, ow, oh);
                     texFrame.additionalAngle = 0;
                 }
 

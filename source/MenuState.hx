@@ -16,7 +16,7 @@ class MenuState extends FlxState {
     private var _spr3:FlxSSPlayer;
     private var _spr4:FlxSSPlayer;
     private var _tex:SSTexturePackerData;
-    private var _texs:Array<SSTexturePackerData>;
+    private var _texs:SSTexturePackerDataMgr;
 
     override public function create():Void {
         super.create();
@@ -56,8 +56,8 @@ class MenuState extends FlxState {
 
         var ss = "assets/images/openning/scene3_anime_1.json";
         var dir = "assets/images/openning";
-        _texs = SSTexturePackerData.parseTextureAll(ss, dir);
-        for(i in 0..._texs.length) {
+        _texs = new SSTexturePackerDataMgr(ss, dir);
+        for(i in 0..._texs.animationMax) {
             var spr = new FlxSSPlayer(FlxG.width/2, FlxG.height/2, ss, _texs, i);
             spr.play(0);
             this.add(spr);

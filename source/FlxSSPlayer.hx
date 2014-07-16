@@ -157,7 +157,7 @@ class FlxSSPlayer extends FlxSprite {
     private var _ofsY:Float;
     private var _ofsAlpha:Float = 1;
 
-    private var _texs:Array<SSTexturePackerData>;
+    private var _texs:SSTexturePackerDataMgr;
     private var _animation:SSAnimation = null;
     private var _frame:Int = 0;
     private var _frameMax:Int = 0;
@@ -170,7 +170,7 @@ class FlxSSPlayer extends FlxSprite {
     private var _timer:FlxTimer = null;
     private var _prevAnimationTexName = "";
 
-    public function new(X:Float, Y:Float, Description:String, Textures:Array<SSTexturePackerData>, FrameNo:Int) {
+    public function new(X:Float, Y:Float, Description:String, Textures:SSTexturePackerDataMgr, FrameNo:Int) {
         super();
 
         _texs = Textures;
@@ -195,8 +195,6 @@ class FlxSSPlayer extends FlxSprite {
         _timer = new FlxTimer(1/_fps, _updateAnimation, 0);
 
         FlxG.watch.add(this, "_prevAnimationTexName");
-        FlxG.watch.add(_animation, "originX");
-        FlxG.watch.add(_animation, "originY");
     }
 
     private function _loadTexture(Index:Int = 0, Unique:Bool = false, ?FrameName:String):FlxSSPlayer {
@@ -205,7 +203,7 @@ class FlxSSPlayer extends FlxSprite {
             return null;
         }
 
-        var Data = _texs[Index];
+        var Data = _texs.getTexture(Index);
 
         if(Data.assetName == null) {
             return null;
