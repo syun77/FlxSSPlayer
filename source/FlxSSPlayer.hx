@@ -10,24 +10,24 @@ import flixel.FlxSprite;
 import openfl.Assets;
 
 class SSAnimation {
-    private static inline var IDX_PART_NO = 0;
-    private static inline var IDX_IMAGE_NO = 1;
-    private static inline var IDX_SOURCE_X = 2;
-    private static inline var IDX_SOURCE_Y = 3;
-    private static inline var IDX_SOURCE_W = 4;
-    private static inline var IDX_SOURCE_H = 5;
-    private static inline var IDX_DST_X = 6;
-    private static inline var IDX_DST_Y = 7;
-    private static inline var IDX_DST_ANGLE = 8;
-    private static inline var IDX_DST_SCALE_X = 9;
-    private static inline var IDX_DST_SCALE_Y = 10;
-    private static inline var IDX_ORIGIN_X = 11;
-    private static inline var IDX_ORIGIN_Y = 12;
-    private static inline var IDX_FLIP_H = 13;
-    private static inline var IDX_FLIP_V = 14;
-    private static inline var IDX_ALPHA = 15;
-    private static inline var IDX_V0_X = 16;
-    private static inline var IDX_V0_Y = 17;
+    private static inline var IDX_PART_NO = 0; // パーツ番号
+    private static inline var IDX_IMAGE_NO = 1; // テクスチャ番号
+    private static inline var IDX_SOURCE_X = 2; // 切り取り座標(X)
+    private static inline var IDX_SOURCE_Y = 3; // 切り取り座標(Y)
+    private static inline var IDX_SOURCE_W = 4; // 切り取る幅
+    private static inline var IDX_SOURCE_H = 5; // 切り取る高さ
+    private static inline var IDX_DST_X = 6; // 描画座標(X)
+    private static inline var IDX_DST_Y = 7; // 描画座標(Y)
+    private static inline var IDX_DST_ANGLE = 8; // 回転(ラジアン)
+    private static inline var IDX_DST_SCALE_X = 9; // スケール値(X)
+    private static inline var IDX_DST_SCALE_Y = 10; // スケール値(Y)
+    private static inline var IDX_ORIGIN_X = 11; // 原点(X)
+    private static inline var IDX_ORIGIN_Y = 12; // 原点(Y)
+    private static inline var IDX_FLIP_H = 13; // 左右反転フラグ
+    private static inline var IDX_FLIP_V = 14; // 上下反転フラグ
+    private static inline var IDX_ALPHA = 15; // 透明度
+    private static inline var IDX_V0_X = 16; // ?X
+    private static inline var IDX_V0_Y = 17; // ?Y
 
     public var imageNo(get, null):Int;
     public var sourceX(get, null):Int;
@@ -182,6 +182,7 @@ class FlxSSPlayer extends FlxSprite {
         var name = _getAnimationTexName();
         // テクスチャを適用
         if(name == null) {
+            // 何も表示しない
             visible = false;
         }
         else {
@@ -192,7 +193,7 @@ class FlxSSPlayer extends FlxSprite {
         // 描画オフセット設定
         setDrawOffset(X, Y);
 
-        _timer = new FlxTimer(1/_fps, _updateAnimation, 0);
+        _timer = new FlxTimer(1.0/_fps, _updateAnimation, 0);
 
         FlxG.watch.add(this, "_prevAnimationTexName");
     }
@@ -360,7 +361,7 @@ class FlxSSPlayer extends FlxSprite {
     }
 
     public function isPause():Bool {
-        return _bPlaying;
+        return _bPlaying == false;
     }
 
     public function isStop():Bool {

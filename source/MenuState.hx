@@ -11,59 +11,16 @@ class MenuState extends FlxState {
 	 * Function that is called up when to state is created to set it up. 
 	 */
 
-    private var _spr:FlxSSPlayer;
-    private var _spr2:FlxSSPlayer;
-    private var _spr3:FlxSSPlayer;
-    private var _spr4:FlxSSPlayer;
-    private var _tex:SSTexturePackerData;
-    private var _texs:SSTexturePackerDataMgr;
+    private var _texs:SSTexturePackerDataMgr = null;
+    private var _sprites:FlxSSPlayerMgr = null;
+
+    private var _step:Int = 1;
 
     override public function create():Void {
         super.create();
-//        var ss = "assets/images/NewAnimation_anime_1.json";
-//        var png = "assets/images/20110821_tile_char.png";
-//        _tex = new SSTexturePackerData(ss, png);
-//        _spr = new FlxSSPlayer(20, 20, ss, _tex, 0);
-//        this.add(_spr);
-//        _spr.play();
-
-//        var ss = "assets/images/antarctic3_anime_1.json";
-//        var png = "assets/images/antarctic.png";
-//        var anim = 0;
-//        _tex = new SSTexturePackerData(ss, png);
-//
-//        _spr = new FlxSSPlayer(20, 20, ss, _tex, 0);
-//        this.add(_spr);
-//        _spr.play();
-//        _spr2 = new FlxSSPlayer(20, 20, ss, _tex, 1);
-//        this.add(_spr2);
-//        _spr2.play();
-//        _spr3 = new FlxSSPlayer(20, 20, ss, _tex, 2);
-//        this.add(_spr3);
-//        _spr3.play();
-//        _spr4 = new FlxSSPlayer(20, 20, ss, _tex, 3);
-//        this.add(_spr4);
-//        _spr4.play();
-
-//        var ss = "assets/images/ss_logo_anime_1_root.json";
-//        var dir = "assets/images";
-//        _tex = new SSTexturePackerData(ss, dir);
-//        for(i in 0..._tex.animationMax) {
-//            var spr = new FlxSSPlayer(FlxG.width/2, FlxG.height/2, ss, _tex, i);
-//            spr.play();
-//            this.add(spr);
-//        }
-
-        var ss = "assets/images/openning/scene3_anime_1.json";
-        var dir = "assets/images/openning";
-        _texs = new SSTexturePackerDataMgr(ss, dir);
-        for(i in 0..._texs.animationMax) {
-            var spr = new FlxSSPlayer(FlxG.width/2, FlxG.height/2, ss, _texs, i);
-            spr.play(0);
-            this.add(spr);
-        }
 
         FlxG.debugger.toggleKeys = ["ALT"];
+        FlxG.debugger.visible = true;
     }
 
     /**
@@ -80,12 +37,36 @@ class MenuState extends FlxState {
     override public function update():Void {
         super.update();
 
+        if(_sprites == null || _sprites.isStop()) {
+
+            if(_sprites != null) {
+                _sprites.destroy();
+            }
+            if(_texs != null) {
+                _texs.destroy();
+            }
+
+            var ss = "assets/images/openning/scene" + _step + "_anime_1.json";
+            var dir = "assets/images/openning";
+            _texs = new SSTexturePackerDataMgr(ss, dir);
+            _sprites = new FlxSSPlayerMgr();
+            for(i in 0..._texs.animationMax) {
+                _sprites.addSSPlayer(FlxG.width/2, FlxG.height/2, ss, _texs, i);
+            }
+            this.add(_sprites);
+
+            _sprites.play(1);
+
+            _step++;
+            if(_step > 4) {
+                _step = 1;
+            }
+        }
+
         if(FlxG.mouse.justPressed) {
-            _spr.play(1);
         }
 
         if(FlxG.keys.justPressed.D) {
-            _spr.toggle();
         }
         if(FlxG.keys.justPressed.R) {
 //            _spr.resetAnimation();

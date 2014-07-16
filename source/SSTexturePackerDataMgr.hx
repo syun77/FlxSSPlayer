@@ -1,5 +1,6 @@
 package ;
 
+import flixel.FlxG;
 import flixel.interfaces.IFlxDestroyable;
 import haxe.Json;
 import openfl.Assets;
