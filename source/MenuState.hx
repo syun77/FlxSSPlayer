@@ -20,7 +20,7 @@ class MenuState extends FlxState {
         super.create();
 
         FlxG.debugger.toggleKeys = ["ALT"];
-        FlxG.debugger.visible = true;
+//        FlxG.debugger.visible = true;
     }
 
     /**

@@ -195,7 +195,7 @@ class FlxSSPlayer extends FlxSprite {
 
         _timer = new FlxTimer(1.0/_fps, _updateAnimation, 0);
 
-        FlxG.watch.add(this, "_prevAnimationTexName");
+//        FlxG.watch.add(this, "_prevAnimationTexName");
     }
 
     private function _loadTexture(Index:Int = 0, Unique:Bool = false, ?FrameName:String):FlxSSPlayer {
@@ -264,6 +264,7 @@ class FlxSSPlayer extends FlxSprite {
     }
 
     override public function destroy():Void {
+//        FlxG.watch.remove(this, "_prevAnimationTexName");
         super.destroy();
         _timer.destroy();
         _timer = null;
